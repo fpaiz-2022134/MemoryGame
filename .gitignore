@@ -1,0 +1,30 @@
+# Ignorar archivos compilados
+*.class
+
+# Ignorar paquetes generados
+*.jar
+*.war
+*.ear
+
+# Ignorar directorios de compilación
+/bin/
+/build/
+/target/
+/out/
+
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar configuraciones de IDEs comunes
+# IntelliJ IDEA
+*.iml
+.idea/
+
+# Eclipse
+*.classpath
+*.project
+*.settings/
+
+# VS Code
+.vscode/
