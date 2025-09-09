@@ -40,6 +40,11 @@ public class ControladorJuego {
      * @return true si encontró un par, false en caso contrario
      */
     public boolean jugarTurno(int fila1, int columna1, int fila2, int columna2) {
+        // Verificar si el juego ya terminó
+        if (juegoTerminado) {
+            return false;
+        }
+        
         // Validar que las selecciones sean diferentes
         if (fila1 == fila2 && columna1 == columna2) {
             return false;
@@ -57,19 +62,24 @@ public class ControladorJuego {
         // Procesar las selecciones
         boolean encontroPar = procesarSelecciones(ficha1, ficha2);
         
+        // Si no encontró par, ocultar las fichas
+        if (!encontroPar) {
+            tablero.ocultarFichas(ficha1, ficha2);  // ← AGREGAR ESTA LÍNEA
+        }
+        
+        // Verificar si el juego terminó  antes de cambiar turno
+        if (tablero.todasEmparejadas()) {
+            finalizarPartida();
+            return encontroPar;
+        }
+        
         // Si no encontró par, cambiar turno
         if (!encontroPar) {
             cambiarTurno();
         }
         
-        // Verificar si el juego terminó
-        if (tablero.todasEmparejadas()) {
-            finalizarPartida();
-        }
-        
         return encontroPar;
     }
-    
     /**
      * Procesa el par de fichas seleccionadas
      * @param ficha1 Primera ficha seleccionada

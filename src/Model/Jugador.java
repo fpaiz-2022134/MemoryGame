@@ -65,4 +65,12 @@ public class Jugador {
     public int getPartidasGanadas() {
         return partidasGanadas;
     }
+    
+    /**
+     * Establece el número de partidas ganadas 
+     * @param partidasGanadas Número de partidas ganadas
+     */
+    public void setPartidasGanadas(int partidasGanadas) {
+        this.partidasGanadas = partidasGanadas;
+    }
 }

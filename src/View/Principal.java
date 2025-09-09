@@ -11,10 +11,13 @@ import Model.Jugador;
  * Fecha: Septiembre 2025
  * Descripción: Interfaz de consola para el juego de memoria
  * Programa: Juego de Memoria - Laboratorio 2 POO
+ * 
+ * PSDT: Traté hacerlo gráfico pero morí
  */
 public class Principal {
     private Scanner scanner;
     private ControladorJuego juego;
+    private Jugador[] jugadoresPrevios;
     
     /**
      * Constructor - Inicializa el scanner para entrada de usuario
@@ -38,16 +41,24 @@ public class Principal {
     private void ejecutar() {
         mostrarMenu();
         
+        String[] nombres = solicitarNombresJugadores();
+        
         do {
-            // Configurar nueva partida
             int[] dimensiones = solicitarDimensiones();
-            String[] nombres = solicitarNombresJugadores();
             
-            // Inicializar juego
             juego = new ControladorJuego(dimensiones[0], dimensiones[1], nombres);
+            
+            // Si no es la primera partida, restaurar estadísticas previas
+            if (jugadoresPrevios != null) {
+                juego.getJugadores()[0].setPartidasGanadas(jugadoresPrevios[0].getPartidasGanadas());
+                juego.getJugadores()[1].setPartidasGanadas(jugadoresPrevios[1].getPartidasGanadas());
+            }
             
             // Jugar partida
             jugarPartida();
+            
+            // Guardar referencia a los jugadores para la próxima partida
+            jugadoresPrevios = juego.getJugadores();
             
             // Mostrar resultados
             mostrarResultados();
@@ -63,7 +74,7 @@ public class Principal {
      */
     public void mostrarMenu() {
         System.out.println("\n╔══════════════════════════════════════╗");
-        System.out.println("║        🧠 MEmORy GAMEEE 🧠        ║");
+        System.out.println("║        	 MEmORy GAMEEE  :0    		 ║");
         System.out.println("║                                      ║");
         System.out.println("║  Encuentra todos los pares de fichas ║");
         System.out.println("║  para ganar puntos y demostrar tu    ║");
@@ -78,19 +89,19 @@ public class Principal {
     public int[] solicitarDimensiones() {
         int[] dimensiones = new int[2];
         
-        System.out.println("\n=== CONFIGURACIÓN DEL TABLERO ===");
+        System.out.println("\n 		Creando Tablero	");
         
         do {
             System.out.print("Ingrese número de filas (mínimo 2, par): ");
             try {
                 dimensiones[0] = Integer.parseInt(scanner.nextLine());
                 if (dimensiones[0] < 2 || dimensiones[0] % 2 != 0) {
-                    System.out.println("❌ Error: Ingrese un número par mayor o igual a 2.");
+                    System.out.println("Error: Ingrese un número par mayor o igual a 2.");
                     continue;
                 }
                 break;
             } catch (NumberFormatException e) {
-                System.out.println("❌ Error: Ingrese un número válido.");
+                System.out.println("Error: Ingrese un número válido.");
             }
         } while (true);
         
@@ -126,7 +137,7 @@ public class Principal {
     public String[] solicitarNombresJugadores() {
         String[] nombres = new String[2];
         
-        System.out.println("\n=== REGISTRO DE JUGADORES ===");
+        System.out.println("\n	Registro de Jugadores	");
         
         System.out.print("Nombre del Jugador 1: ");
         nombres[0] = scanner.nextLine().trim();
@@ -142,7 +153,6 @@ public class Principal {
         
         return nombres;
     }
-    
     /**
      * Controla el flujo de una partida completa
      */
@@ -155,6 +165,11 @@ public class Principal {
             System.out.println("\nTablero actual:");
             System.out.println(juego.getTablero().mostrarTablero());
             
+            // Verificar si ya terminó antes de solicitar selecciones
+            if (juego.isJuegoTerminado()) {
+                break;
+            }
+            
             // Solicitar selecciones del jugador actual
             int[][] selecciones = solicitarDosSelecciones();
             
@@ -164,15 +179,22 @@ public class Principal {
                 selecciones[1][0], selecciones[1][1]
             );
             
-            // Mostrar resultado del turno
-            if (encontroPar) {
-                System.out.println("🎉 ¡Excelente! " + juego.getJugadorActual().getNombre() + " encontró un par!");
-                System.out.println("   Continúa jugando...");
+            // Mostrar resultado del turno si el juego no terminó
+            if (!juego.isJuegoTerminado()) {
+                if (encontroPar) {
+                    System.out.println("🎉 ¡Excelente! " + juego.getJugadorActual().getNombre() + " encontró un par!");
+                    System.out.println("   Continúa jugando...");
+                } else {
+                    System.out.println("❌ Las fichas no coinciden. Turno perdido.");
+                    // Pausa para que vean las fichas antes de ocultarlas
+                    System.out.println("   Presiona Enter para continuar...");
+                    scanner.nextLine();
+                }
             } else {
-                System.out.println("❌ Las fichas no coinciden. Turno perdido.");
-                // Pausa para que vean las fichas antes de ocultarlas
-                System.out.println("   Presiona Enter para continuar...");
-                scanner.nextLine();
+                // Si el juego terminó con este par
+                if (encontroPar) {
+                    System.out.println("🎉 ¡" + juego.getJugadorActual().getNombre() + " encontró el último par!");
+                }
             }
         }
     }
@@ -195,7 +217,7 @@ public class Principal {
             
             // Verificar que no sea la misma posición
             if (selecciones[0][0] == selecciones[1][0] && selecciones[0][1] == selecciones[1][1]) {
-                System.out.println("❌ No puedes seleccionar la misma casilla dos veces.");
+                System.out.println("No puedes seleccionar la misma casilla dos veces :/");
             } else {
                 break;
             }
@@ -224,11 +246,11 @@ public class Principal {
                 if (juego.getTablero().esSeleccionValida(coordenadas[0], coordenadas[1])) {
                     break;
                 } else {
-                    System.out.println("❌ Selección inválida. Verifica las coordenadas y que la ficha no esté emparejada.");
+                    System.out.println("Selección no válida. Verifica las coordenadas y que la ficha no esté emparejada.");
                 }
                 
             } catch (NumberFormatException e) {
-                System.out.println("❌ Error: Ingrese números válidos.");
+                System.out.println("Error: Ingrese números válidos por favor.");
             }
         } while (true);
         
